@@ -1,38 +1,106 @@
+# Flight Price Prediction
 
-# Flight Price Prediction App 
+A Flask web app that estimates flight ticket prices based on travel details like airline, route, departure time, and number of stops. Enter your trip parameters, and the app runs them through a trained XGBoost model to give you a fare estimate.
 
-A machine learning web application that predicts flight ticket prices based on airline, source, destination, departure time, and stops. Built with **Flask**, **XGBoost**, and **Pandas**.
+The project covers the full pipeline — raw data to deployed web app — with the EDA, feature engineering, and training work documented in a Jupyter notebook if you want to follow along or tweak the model.
 
-##  Features
-- **Predict Flight Fares**: Enter travel details to get an estimated ticket price.
-- **Machine Learning**: Uses an XGBoost regressor trained on historical flight data.
-- **Data Analysis**: Includes a Jupyter notebook (`flight_price.ipynb`) showing EDA, feature engineering, and model training.
+---
 
-##  Tech Stack
-- **Python** (Pandas, NumPy, Scikit-learn)
-- **Machine Learning**: XGBoost
-- **Web Framework**: Flask
-- **Frontend**: HTML/CSS
+## Demo
 
-##  Project Structure
-- `app.py`: Main Flask application.
-- `flight_price.ipynb`: Notebook for data cleaning and model training.
-- `flight_xgb.pkl`: Trained model file.
-- `templates/`: HTML templates for the web interface.
-- `dataset/`: Training and testing data.
+> Add a screenshot of the web interface here once available.
 
-##  How to Run Locally
-1. Clone the repository:
+---
+
+## How the Model Was Built
+
+The training data covers domestic Indian flights with records across airlines like IndiGo, Jet Airways, Air India, and others. The raw dataset needed a fair amount of cleaning before it was usable — departure and arrival times were stored as strings, duration was in a mixed format, and the route column needed parsing to extract stop counts reliably.
+
+After preprocessing, the key features fed into the model are:
+
+- Airline
+- Source and destination city
+- Departure time and arrival time (hour extracted)
+- Total stops (non-stop, 1 stop, 2+ stops)
+- Flight duration (in minutes)
+- Date, month of journey
+
+XGBoost was chosen over simpler regressors because flight prices are non-linear — the relationship between stops, duration, and price doesn't behave uniformly across airlines. The full reasoning, feature importance plots, and evaluation metrics are in `flight_price.ipynb`.
+
+---
+
+## Tech Stack
+
+- **Flask** — web framework and API layer
+- **XGBoost** — regression model for fare prediction
+- **Scikit-learn** — preprocessing and pipeline utilities
+- **Pandas / NumPy** — data cleaning and feature engineering
+- **HTML / CSS** — frontend templates (Jinja2)
+
+---
+
+## Repository Structure
+
+```
+Flight-Price-Prediction/
+│
+├── app.py                  # Flask application and prediction route
+├── flight_price.ipynb      # EDA, feature engineering, and model training
+├── flight_xgb.pkl          # Serialized trained XGBoost model
+│
+├── templates/              # HTML templates for the web interface
+│
+├── dataset/                # Training and test CSV files
+│
+└── requirements.txt
+```
+
+---
+
+## Running Locally
+
+**1. Clone the repo**
+
+```bash
 git clone https://github.com/atharvakadam-7/Flight-Price-Prediction.git
-2. Install dependencies:
+cd Flight-Price-Prediction
+```
+
+**2. Install dependencies**
+
+```bash
 pip install -r requirements.txt
-3. Run the app:
+```
+
+**3. Start the app**
+
+```bash
 python app.py
-4. Open your browser and go to `http://127.0.0.1:5000/`.
+```
 
-##  Dataset
-The model was trained on a flight dataset containing information like:
-- **Airlines**: Indigo, Jet Airways, Air India, etc.
-- **Route**: Departure/Arrival times, Source, Destination.
-- **Stops**: Number of layovers.
+Open `http://127.0.0.1:5000` in your browser. Fill in the travel details and hit Predict.
 
+---
+
+## Dataset
+
+The training data contains domestic Indian flight records with the following fields:
+
+| Field | Description |
+|---|---|
+| Airline | Carrier name (IndiGo, Air India, Jet Airways, etc.) |
+| Source / Destination | Departure and arrival cities |
+| Dep_Time / Arrival_Time | Scheduled times for departure and arrival |
+| Duration | Total flight time |
+| Total_Stops | Number of layovers (non-stop through 4 stops) |
+| Price | Ticket fare in INR — the target variable |
+
+The dataset is split into train and test files, both included in `dataset/`. The notebook walks through the cleaning steps if you want to understand what was done before the data reached the model.
+
+---
+
+## Notes
+
+The model generalizes reasonably well within the range of the training data — Indian domestic routes, standard airline carriers, and journey dates within the original dataset period. Predictions outside that scope (international routes, carriers not in the training set) will be less reliable.
+
+If you want to retrain with newer data or experiment with hyperparameters, `flight_price.ipynb` has the full pipeline. Swapping in updated flight data and rerunning the notebook will produce a new `.pkl` file you can drop straight into the app.
